@@ -240,7 +240,7 @@
 
     <!-- フッター -->
     <div class="p-3 text-center text-xs border-t" style="background:#f6f1e3; color:#6b7280;">
-      N=日常回 / R=良回 / SR=神回 / SSR=プレミアム放送
+      N=日常回 / R=良回 / SR=ざわつき回 / SSR=プレミアム放送
     </div>
   </div>
 
@@ -254,8 +254,8 @@
     const CONFIG = {
       rarityWeights: { SSR: 5, SR: 15, R: 30, N: 50 },
       rarityMeta: {
-        SSR: { name: 'SSR', text: 'プレミアム放送！のざこの部屋へようこそ！', color: '#0f172a' },
-        SR:  { name: 'SR',  text: '神回降臨！リスナーがざわついたあの回。',   color: '#dca54a' },
+        SSR: { name: 'SSR', text: 'プレミアム放送！表では聴けない話をぜひ！', color: '#0f172a' },
+        SR:  { name: 'SR',  text: 'リスナーがざわついたあの回！！',   color: '#dca54a' },
         R:   { name: 'R',   text: 'リスナー反応多めの良回！',                 color: '#b9863a' },
         N:   { name: 'N',   text: '日常回。これもまた味わい深く。',           color: '#9ca3af' },
       },
@@ -422,7 +422,7 @@
 
       if (rarity === 'SSR') {
         els.episodeOption.classList.remove('hidden');
-        els.voicyLink.innerHTML = '<span aria-hidden="true">▶</span> のざこの部屋で開く';
+        els.voicyLink.innerHTML = '<span aria-hidden="true">▶</span> プレミアム放送を開く';
       } else {
         els.episodeOption.classList.add('hidden');
         els.voicyLink.innerHTML = '<span aria-hidden="true">▶</span> Voicyで開く';
