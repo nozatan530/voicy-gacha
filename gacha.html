@@ -8,868 +8,463 @@
 <meta property="og:description" content="Voicy「学びのセカンドオピニオン」の過去放送をガチャで掘り起こす遊び場。">
 <meta property="og:type" content="website">
 
+<script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700&family=Rubik:wght@500;600;700&display=swap" rel="stylesheet">
 
 <style>
-/* ============================================================
-   CONFIG ─ 他のVoicyパーソナリティが使うときは
-   <script> の中の CONFIG を編集してください（下の方にあります）。
-   ============================================================ */
-
-:root {
-  --bg: #0e0d12;
-  --bg-card: #1a1820;
-  --ink: #f3ede4;
-  --ink-muted: #9b9389;
-  --line: rgba(243, 237, 228, 0.08);
-
-  /* レア度カラー */
-  --ssr: #ffd56b;       /* 金 */
-  --ssr-glow: #ffe9a8;
-  --sr: #c8c8d4;        /* 銀 */
-  --sr-glow: #e5e5ee;
-  --r: #cc8d5a;         /* 銅 */
-  --r-glow: #e6b48a;
-  --n: #8ba39a;         /* 古淡色 */
-
-  --font-display: 'Shippori Mincho', serif;
-  --font-body: 'Zen Kaku Gothic New', 'Hiragino Sans', sans-serif;
-}
-
-* { box-sizing: border-box; }
-
-html, body {
-  margin: 0;
-  padding: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-body);
-  min-height: 100vh;
-}
-
-body {
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(255, 213, 107, 0.04), transparent 60%),
-    radial-gradient(ellipse at 50% 100%, rgba(200, 200, 212, 0.03), transparent 60%),
-    var(--bg);
-}
-
-/* ─── 全体レイアウト ─── */
-.app {
-  max-width: 540px;
-  margin: 0 auto;
-  padding: 2.5rem 1.5rem 4rem;
-}
-
-.app__header {
-  text-align: center;
-  margin-bottom: 2.5rem;
-}
-
-.app__brand {
-  font-size: 0.7rem;
-  letter-spacing: 0.25em;
-  color: var(--ink-muted);
-  text-transform: uppercase;
-  margin: 0 0 0.6rem;
-}
-
-.app__title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(1.6rem, 5vw, 2rem);
-  line-height: 1.3;
-  margin: 0 0 0.5rem;
-}
-
-.app__subtitle {
-  font-size: 0.85rem;
-  color: var(--ink-muted);
-  margin: 0;
-}
-
-/* ─── ガチャ筐体 ─── */
-.gacha {
-  position: relative;
-  background: linear-gradient(180deg, #1a1820 0%, #0e0d12 100%);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 2rem 1.5rem 2.5rem;
-  text-align: center;
-  overflow: hidden;
-}
-
-.gacha__decoration {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--ssr), transparent);
-  opacity: 0.6;
-}
-
-.gacha__stats {
-  font-size: 0.75rem;
-  color: var(--ink-muted);
-  margin-bottom: 1.5rem;
-  letter-spacing: 0.04em;
-}
-
-.gacha__stats strong {
-  color: var(--ink);
-  font-weight: 700;
-}
-
-/* ─── カード（待機状態） ─── */
-.card-stage {
-  perspective: 1200px;
-  height: 240px;
-  margin: 0 auto 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.card {
-  position: relative;
-  width: 180px;
-  height: 240px;
-  transform-style: preserve-3d;
-  transition: transform 0.9s cubic-bezier(0.34, 1.2, 0.64, 1);
-}
-
-.card.is-flipping {
-  transform: rotateY(720deg);
-}
-
-.card.is-revealed {
-  transform: rotateY(720deg);
-}
-
-.card__face {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 1rem;
-  text-align: center;
-}
-
-.card__back {
-  background:
-    radial-gradient(circle at 50% 30%, rgba(255, 213, 107, 0.15), transparent 60%),
-    linear-gradient(160deg, #2a2530 0%, #14131a 100%);
-  border: 1px solid var(--line);
-}
-
-.card__back-mark {
-  font-family: var(--font-display);
-  font-size: 3.5rem;
-  color: var(--ssr);
-  opacity: 0.4;
-  font-weight: 700;
-}
-
-.card__back-label {
-  font-size: 0.65rem;
-  letter-spacing: 0.3em;
-  color: var(--ink-muted);
-  margin-top: 0.5rem;
-  text-transform: uppercase;
-}
-
-.card__front {
-  transform: rotateY(180deg);
-  background: linear-gradient(160deg, #2a2530 0%, #14131a 100%);
-  border: 2px solid var(--line);
-  display: none;
-}
-
-.card.is-revealed .card__front { display: flex; }
-
-/* レア度ごとのフロントカード */
-.card__front[data-rarity="SSR"] {
-  border-color: var(--ssr);
-  box-shadow:
-    0 0 30px rgba(255, 213, 107, 0.4),
-    0 0 60px rgba(255, 213, 107, 0.2),
-    inset 0 0 20px rgba(255, 213, 107, 0.1);
-  background:
-    radial-gradient(circle at 50% 50%, rgba(255, 213, 107, 0.15), transparent 70%),
-    linear-gradient(160deg, #2a2530 0%, #14131a 100%);
-  animation: ssr-glow 2s ease-in-out infinite;
-}
-
-.card__front[data-rarity="SR"] {
-  border-color: var(--sr);
-  box-shadow: 0 0 20px rgba(200, 200, 212, 0.25);
-  background:
-    radial-gradient(circle at 50% 50%, rgba(200, 200, 212, 0.08), transparent 70%),
-    linear-gradient(160deg, #2a2530 0%, #14131a 100%);
-}
-
-.card__front[data-rarity="R"] {
-  border-color: var(--r);
-  background:
-    radial-gradient(circle at 50% 50%, rgba(204, 141, 90, 0.06), transparent 70%),
-    linear-gradient(160deg, #2a2530 0%, #14131a 100%);
-}
-
-.card__front[data-rarity="N"] {
-  border-color: var(--line);
-}
-
-@keyframes ssr-glow {
-  0%, 100% { box-shadow: 0 0 30px rgba(255, 213, 107, 0.4), 0 0 60px rgba(255, 213, 107, 0.2); }
-  50% { box-shadow: 0 0 40px rgba(255, 213, 107, 0.6), 0 0 80px rgba(255, 213, 107, 0.3); }
-}
-
-.card__rarity {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 2.4rem;
-  margin: 0;
-  line-height: 1;
-}
-
-.card__front[data-rarity="SSR"] .card__rarity { color: var(--ssr); }
-.card__front[data-rarity="SR"] .card__rarity { color: var(--sr); }
-.card__front[data-rarity="R"] .card__rarity { color: var(--r); }
-.card__front[data-rarity="N"] .card__rarity { color: var(--n); }
-
-.card__rarity-jp {
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
-  color: var(--ink-muted);
-  margin: 0.5rem 0 0.8rem;
-}
-
-.card__hint {
-  font-size: 0.7rem;
-  color: var(--ink-muted);
-  margin-top: auto;
-}
-
-/* ─── ガチャボタン ─── */
-.gacha__action {
-  margin-top: 1.5rem;
-}
-
-.btn-pull {
-  background: linear-gradient(180deg, var(--ssr) 0%, #d4a84a 100%);
-  color: #1a1820;
-  border: none;
-  border-radius: 100px;
-  padding: 0.9rem 2.5rem;
-  font-size: 1rem;
-  font-weight: 700;
-  font-family: var(--font-body);
-  cursor: pointer;
-  letter-spacing: 0.08em;
-  box-shadow: 0 4px 20px rgba(255, 213, 107, 0.3);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.btn-pull:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 28px rgba(255, 213, 107, 0.45);
-}
-
-.btn-pull:active { transform: translateY(0); }
-
-.btn-pull:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* ─── 結果ディテール ─── */
-.result {
-  display: none;
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--line);
-  text-align: left;
-}
-
-.result.is-visible { display: block; animation: fade-up 0.6s ease-out both; }
-
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.result__premium-notice {
-  display: none;
-  background: rgba(255, 213, 107, 0.08);
-  border: 1px solid var(--ssr);
-  border-radius: 6px;
-  padding: 1rem 1.2rem;
-  margin-bottom: 1.2rem;
-  font-size: 0.85rem;
-  line-height: 1.7;
-}
-
-.result__premium-notice.is-visible { display: block; }
-
-.result__premium-notice strong {
-  color: var(--ssr);
-  font-weight: 700;
-}
-
-.result__date {
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  color: var(--ink-muted);
-  margin: 0 0 0.5rem;
-}
-
-.result__ep-title {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 700;
-  line-height: 1.5;
-  margin: 0 0 1rem;
-}
-
-.result__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  font-size: 0.78rem;
-  color: var(--ink-muted);
-  margin-bottom: 1.4rem;
-  padding-bottom: 1.2rem;
-  border-bottom: 1px solid var(--line);
-}
-
-.result__meta-item span:first-child {
-  display: block;
-  font-size: 0.65rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  margin-bottom: 0.2rem;
-}
-
-.result__player {
-  margin: 1.4rem 0 0.6rem;
-  border-radius: 6px;
-  overflow: hidden;
-  background: var(--bg-card);
-  min-height: 0;
-  transition: min-height 0.3s ease;
-}
-
-.result__player:not(:empty) {
-  min-height: 385px;
-}
-
-.result__player iframe {
-  display: block;
-  width: 100%;
-  border: 0;
-}
-
-.result__player-fallback {
-  font-size: 0.72rem;
-  color: var(--ink-muted);
-  margin: 0 0 1.2rem;
-  text-align: center;
-}
-
-.result__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
-
-.btn-listen,
-.btn-secondary {
-  flex: 1;
-  min-width: 140px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  padding: 0.7rem 1rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-decoration: none;
-  border-radius: 100px;
-  font-family: var(--font-body);
-  cursor: pointer;
-  transition: transform 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-  border: 1px solid;
-}
-
-.btn-listen {
-  background: var(--ink);
-  color: var(--bg);
-  border-color: var(--ink);
-}
-
-.btn-listen:hover { transform: translateY(-2px); }
-
-.btn-secondary {
-  background: transparent;
-  color: var(--ink);
-  border-color: var(--ink-muted);
-}
-
-.btn-secondary:hover {
-  border-color: var(--ssr);
-  color: var(--ssr);
-}
-
-/* ─── フッター ─── */
-.app__footer {
-  margin-top: 2rem;
-  text-align: center;
-  font-size: 0.75rem;
-  color: var(--ink-muted);
-  line-height: 1.8;
-}
-
-.app__footer a {
-  color: var(--ink-muted);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-}
-
-.app__footer a:hover { color: var(--ssr); }
-
-/* ─── ローディング ─── */
-.loading {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: var(--ink-muted);
-  font-size: 0.85rem;
-}
-
-/* ─── SSR時のパーティクル ─── */
-.particles {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.particle {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--ssr-glow);
-  box-shadow: 0 0 6px var(--ssr);
-  opacity: 0;
-}
-
-.particle.is-active {
-  animation: particle-rise 2s ease-out forwards;
-}
-
-@keyframes particle-rise {
-  0% { opacity: 0; transform: translateY(0) scale(0); }
-  20% { opacity: 1; transform: translateY(-20px) scale(1); }
-  100% { opacity: 0; transform: translateY(-200px) scale(0.5); }
-}
-
-/* ─── アクセシビリティ ─── */
-@media (prefers-reduced-motion: reduce) {
-  .card { transition: none; }
-  .card__front[data-rarity="SSR"] { animation: none; }
-  .particle.is-active { animation: none; opacity: 0; }
-  .result.is-visible { animation: none; }
-}
-
-/* WordPress埋め込み時のリセット保険 */
-.app * { box-sizing: border-box; }
+  :root {
+    /* meetupsensei.com の実測カラー */
+    --cream: #faf5e5;
+    --cream-dot: #f0e6cc;
+    --cream-glow: #f3e7c9;
+    --navy: #0f172a;
+    --navy-soft: #334155;
+    --gold: #dca54a;
+    --gold-deep: #b9863a;
+    --gold-pale: #f3d9a6;
+    --white: #ffffff;
+    --gray-line: #d8d2c0;
+  }
+
+  body {
+    font-family: 'Karla', sans-serif;
+    background-color: var(--cream);
+    background-image: radial-gradient(var(--cream-dot) 2px, transparent 2px);
+    background-size: 30px 30px;
+    color: var(--navy);
+    overflow-x: hidden;
+  }
+
+  .font-heading { font-family: 'Rubik', sans-serif; }
+
+  /* カプセル：通常はふわふわ */
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+  .bouncing { animation: bounce 1s infinite ease-in-out; }
+
+  /* カプセル：抽選中は揺れる */
+  @keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    20% { transform: translate(-3px, 0) rotate(1deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+  }
+  .shaking { animation: shake 0.5s infinite; }
+
+  /* レア度別カード：サイトのクリーム×ネイビー×ゴールドを基調に */
+  .card-N {
+    background: linear-gradient(135deg, #ffffff 0%, #f6f3ea 100%);
+    border: 2px solid #b9b29a;
+    box-shadow: 0 4px 6px rgba(15, 23, 42, 0.08);
+  }
+  .card-R {
+    background: linear-gradient(135deg, #ffffff 0%, var(--cream-glow) 100%);
+    border: 2px solid var(--gold-pale);
+    box-shadow: 0 0 15px rgba(220, 165, 74, 0.25);
+  }
+  .card-SR {
+    background: linear-gradient(135deg, #fff8e8 0%, var(--gold-pale) 100%);
+    border: 2px solid var(--gold);
+    box-shadow: 0 0 20px rgba(220, 165, 74, 0.45);
+    position: relative;
+    overflow: hidden;
+  }
+  .card-SR::before {
+    content: "";
+    position: absolute;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0) 100%);
+    transform: rotate(45deg);
+    animation: shine 3s infinite;
+  }
+  /* SSR：プレミアム放送だけは夜のスポットライト風（ネイビー×ゴールド反転） */
+  .card-SSR {
+    background: linear-gradient(135deg, #1e2944 0%, var(--navy) 60%, #0a0f1d 100%);
+    border: 3px solid var(--gold);
+    box-shadow: 0 0 30px rgba(220, 165, 74, 0.7), inset 0 0 16px rgba(220, 165, 74, 0.15);
+    color: #f5ecd8;
+    position: relative;
+    overflow: hidden;
+    animation: pulse-border 2s infinite;
+  }
+  .card-SSR::before {
+    content: "";
+    position: absolute;
+    top: -100%; left: -100%; width: 300%; height: 300%;
+    background: conic-gradient(transparent, rgba(220, 165, 74, 0.5), transparent 30%);
+    animation: rotate-shine 4s linear infinite;
+  }
+  .card-SSR .result-title,
+  .card-SSR .result-date,
+  .card-SSR .result-meta { color: #f5ecd8 !important; }
+
+  @keyframes shine {
+    0% { left: -100%; top: -100%; }
+    20% { left: 100%; top: 100%; }
+    100% { left: 100%; top: 100%; }
+  }
+  @keyframes rotate-shine { 100% { transform: rotate(360deg); } }
+  @keyframes pulse-border {
+    0% { box-shadow: 0 0 20px rgba(220, 165, 74, 0.5); }
+    50% { box-shadow: 0 0 38px rgba(220, 165, 74, 0.85); }
+    100% { box-shadow: 0 0 20px rgba(220, 165, 74, 0.5); }
+  }
+
+  .hide { display: none !important; }
+  .fade-in { animation: fadeIn 0.5s forwards; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .card-N > *, .card-R > *, .card-SR > *, .card-SSR > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 埋め込みプレイヤー */
+  .player-wrap {
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(15, 23, 42, 0.04);
+    min-height: 0;
+  }
+  .player-wrap:not(:empty) { min-height: 385px; }
+  .player-wrap iframe { display: block; width: 100%; border: 0; }
+  .card-SSR .player-wrap { background: rgba(255, 255, 255, 0.06); }
+  .player-fallback {
+    font-size: 0.7rem;
+    opacity: 0.65;
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bouncing, .shaking, .card-SR::before, .card-SSR::before, .card-SSR { animation: none; }
+    .fade-in { animation: none; }
+  }
 </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-<div class="app">
+  <div class="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden border-4 relative" style="border-color:#dca54a;">
 
-  <header class="app__header">
-    <p class="app__brand">Voicy Archive Gacha</p>
-    <h1 class="app__title">のざたんの気まぐれアーカイブガチャ</h1>
-    <p class="app__subtitle">過去放送のなかから、今日のあなたへの一本を。</p>
-  </header>
-
-  <div class="gacha" id="gacha">
-
-    <div class="gacha__decoration"></div>
-
-    <p class="gacha__stats" id="stats">放送データを読み込み中…</p>
-
-    <div class="card-stage">
-      <div class="card" id="card">
-        <div class="card__face card__back">
-          <div class="card__back-mark">籤</div>
-          <div class="card__back-label">PULL TO REVEAL</div>
-        </div>
-        <div class="card__face card__front" id="cardFront" data-rarity="N">
-          <h2 class="card__rarity" id="cardRarity">N</h2>
-          <p class="card__rarity-jp" id="cardRarityLabel">日常回</p>
-          <p class="card__hint">↓ 詳細はこちら ↓</p>
-        </div>
-        <div class="particles" id="particles"></div>
-      </div>
+    <!-- ヘッダー -->
+    <div class="p-6 text-center" style="background:#dca54a;">
+      <h1 class="text-2xl font-bold mb-2 tracking-wide font-heading text-white">
+        <span aria-hidden="true">🎙️</span> 学びのセカンドオピニオン
+      </h1>
+      <h2 class="text-lg font-semibold font-heading" style="color:#fdf2de;">のざたんの気まぐれアーカイブガチャ</h2>
     </div>
 
-    <div class="gacha__action">
-      <button class="btn-pull" id="pullBtn" type="button">ガチャを引く</button>
+    <div class="p-6 flex flex-col items-center min-h-[400px] justify-center relative">
+
+      <!-- ガチャマシン画面 -->
+      <div id="gacha-machine" class="flex flex-col items-center w-full">
+        <p id="intro-text" class="mb-6 text-center font-semibold" style="color:#334155;">
+          過去の放送から<br>運命の1本に出会おう！
+        </p>
+
+        <!-- カプセル -->
+        <div class="relative w-48 h-48 mb-8 flex items-center justify-center">
+          <div class="absolute inset-0 rounded-full blur-xl opacity-60" style="background:#f3e7c9;"></div>
+          <svg
+            id="capsule-image"
+            class="w-32 h-32 bouncing z-10 drop-shadow-xl transition-all duration-300"
+            viewBox="0 0 64 64"
+            xmlns="http://www.w3.org/2000/svg"
+            role="img"
+            aria-label="ガチャカプセル"
+          >
+            <rect x="8" y="26" width="48" height="30" rx="4" fill="#dca54a"/>
+            <rect x="8" y="26" width="48" height="10" fill="#b9863a"/>
+            <rect x="4" y="16" width="56" height="12" rx="3" fill="#0f172a"/>
+            <rect x="27" y="6" width="10" height="50" fill="#f5ecd8"/>
+            <rect x="4" y="20" width="56" height="4" fill="#f5ecd8"/>
+            <path d="M32 6 C 24 6, 22 14, 27 16 L 37 16 C 42 14, 40 6, 32 6 Z" fill="#0f172a"/>
+          </svg>
+        </div>
+
+        <button
+          id="draw-btn"
+          class="w-full py-4 text-white font-bold rounded-full text-xl transition-all flex items-center justify-center gap-2 font-heading"
+          style="background:linear-gradient(180deg,#e6b765 0%,#dca54a 100%); box-shadow:0 6px 0 #b9863a;"
+        >
+          <span aria-hidden="true">✨</span> ガチャを回す！
+        </button>
+      </div>
+
+      <!-- 結果画面 -->
+      <div id="result-screen" class="w-full flex-col items-center hide">
+        <div class="text-center mb-4">
+          <span id="rarity-badge" class="inline-block px-4 py-1 rounded-full text-white font-black text-xl mb-2 tracking-widest shadow-md font-heading">N</span>
+          <p id="rarity-text" class="text-sm font-bold" style="color:#6b7280;">―</p>
+        </div>
+
+        <!-- 結果カード -->
+        <div id="result-card" class="card-N rounded-2xl p-6 mb-6 w-full text-center flex flex-col gap-4 justify-center">
+          <div class="absolute top-3 right-4 text-xs font-bold opacity-60 result-date">
+            <span id="episode-date">―</span>
+          </div>
+          <h3 id="episode-title" class="text-base sm:text-lg font-bold leading-snug break-words px-2 font-heading result-title">―</h3>
+
+          <div class="flex flex-wrap gap-2 justify-center text-xs font-bold result-meta" style="color:#6b7280;">
+            <span id="episode-length">⏱ ―</span>
+            <span id="episode-likes">❤ ―</span>
+            <span id="episode-option" class="hidden">👑 プレミアム</span>
+          </div>
+
+          <!-- Voicy埋め込みプレイヤー -->
+          <div class="player-wrap" id="result-player"></div>
+          <p class="player-fallback" id="player-fallback">プレイヤーが表示されない場合は、下のボタンからVoicyで開いてください。</p>
+
+          <a
+            id="voicy-link"
+            href="#"
+            target="_blank"
+            rel="noopener"
+            class="inline-block mt-1 py-3 px-6 text-white font-bold rounded-full transition-colors shadow-md font-heading"
+            style="background:#0f172a;"
+          >
+            <span aria-hidden="true">▶</span> Voicyで開く
+          </a>
+        </div>
+
+        <!-- アクション -->
+        <div class="flex gap-3 w-full">
+          <button id="retry-btn" class="flex-1 py-3 font-bold rounded-xl transition-colors font-heading" style="background:#f0e6cc; color:#0f172a;">
+            もう1回引く
+          </button>
+          <button id="share-btn" class="flex-1 py-3 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2 font-heading" style="background:#0f172a;">
+            <span aria-hidden="true">𝕏</span> シェア
+          </button>
+        </div>
+      </div>
+
     </div>
 
-    <div class="result" id="result" aria-live="polite">
-
-      <div class="result__premium-notice" id="premiumNotice">
-        <strong>★ プレミアム放送が出ました ★</strong><br>
-        この放送は<strong>のざこの部屋（プレミアムリスナー限定）</strong>でのみ
-        聴ける特別な一本です。ぜひこの機会に登録してみてください。
-      </div>
-
-      <p class="result__date" id="resultDate"></p>
-      <h3 class="result__ep-title" id="resultTitle"></h3>
-
-      <div class="result__meta">
-        <div class="result__meta-item">
-          <span>放送尺</span>
-          <span id="resultLength">―</span>
-        </div>
-        <div class="result__meta-item">
-          <span>いいね</span>
-          <span id="resultLikes">―</span>
-        </div>
-        <div class="result__meta-item">
-          <span>区分</span>
-          <span id="resultOption">―</span>
-        </div>
-      </div>
-
-      <div class="result__player" id="resultPlayer">
-        <!-- Voicy埋め込みiframeがここに差し込まれる -->
-      </div>
-
-      <p class="result__player-fallback" id="playerFallback">
-        プレイヤーが表示されない場合は、下のボタンからVoicyで開いてください。
-      </p>
-
-      <div class="result__actions">
-        <a class="btn-listen" id="listenBtn" href="#" target="_blank" rel="noopener">Voicyで開く →</a>
-        <button class="btn-secondary" id="shareBtn" type="button">𝕏 でシェア</button>
-        <button class="btn-secondary" id="againBtn" type="button">もう一回引く</button>
-      </div>
-
+    <!-- フッター -->
+    <div class="p-3 text-center text-xs border-t" style="background:#f6f1e3; color:#6b7280;">
+      N=日常回 / R=良回 / SR=神回 / SSR=プレミアム放送
     </div>
-
   </div>
 
-  <footer class="app__footer">
-    <p>
-      Voicy「<a href="https://voicy.jp/channel/3708" target="_blank" rel="noopener">学びのセカンドオピニオン</a>」<br>
-      パーソナリティ・<a href="https://meetupsensei.com" target="_blank" rel="noopener">のざたん</a>
-    </p>
-  </footer>
+  <!-- 放送データ（JSON埋め込み。standalone版生成時にこの中身を差し替える） -->
+  <script type="application/json" id="episodes-data"></script>
 
-</div>
+  <script>
+    // ============================================================
+    // CONFIG ─ 他のチャンネルで使うときはここを編集してください
+    // ============================================================
+    const CONFIG = {
+      rarityWeights: { SSR: 5, SR: 15, R: 30, N: 50 },
+      rarityMeta: {
+        SSR: { name: 'SSR', text: 'プレミアム放送！のざこの部屋へようこそ！', color: '#0f172a' },
+        SR:  { name: 'SR',  text: '神回降臨！リスナーがざわついたあの回。',   color: '#dca54a' },
+        R:   { name: 'R',   text: 'リスナー反応多めの良回！',                 color: '#b9863a' },
+        N:   { name: 'N',   text: '日常回。これもまた味わい深く。',           color: '#9ca3af' },
+      },
+      shareHashtag: 'のざたんガチャ',
+      shareTextTemplate: (rarity, title) =>
+        `のざたんガチャを引いたら【${rarity}】が出ました！\n「${title}」\n`,
+    };
 
-<script>
-// ============================================================
-// CONFIG ─ 他のチャンネルで使うときはここを編集してください
-// ============================================================
-const CONFIG = {
-  // 放送データのJSONファイルパス（同じディレクトリに置く想定）
-  dataUrl: './episodes.json',
+    // ============================================================
+    // 以下は通常編集不要
+    // ============================================================
 
-  // 各レア度の出現確率（合計100）
-  rarityWeights: {
-    SSR: 5,
-    SR: 15,
-    R: 30,
-    N: 50,
-  },
+    const els = {
+      gachaMachine: document.getElementById('gacha-machine'),
+      resultScreen: document.getElementById('result-screen'),
+      drawBtn: document.getElementById('draw-btn'),
+      retryBtn: document.getElementById('retry-btn'),
+      shareBtn: document.getElementById('share-btn'),
+      capsuleImage: document.getElementById('capsule-image'),
+      rarityBadge: document.getElementById('rarity-badge'),
+      rarityText: document.getElementById('rarity-text'),
+      resultCard: document.getElementById('result-card'),
+      episodeDate: document.getElementById('episode-date'),
+      episodeTitle: document.getElementById('episode-title'),
+      episodeLength: document.getElementById('episode-length'),
+      episodeLikes: document.getElementById('episode-likes'),
+      episodeOption: document.getElementById('episode-option'),
+      resultPlayer: document.getElementById('result-player'),
+      playerFallback: document.getElementById('player-fallback'),
+      voicyLink: document.getElementById('voicy-link'),
+      introText: document.getElementById('intro-text'),
+    };
 
-  // 各レア度の日本語ラベル
-  rarityLabels: {
-    SSR: 'プレミアム回',
-    SR: '神回',
-    R: '良回',
-    N: '日常回',
-  },
+    let episodes = [];
+    let episodesByRarity = { SSR: [], SR: [], R: [], N: [] };
+    let currentResult = null;
 
-  // シェア時のテキスト
-  shareTextTemplate: (rarity, title) =>
-    `のざたんガチャを引いたら ${rarity}（${CONFIG.rarityLabels[rarity]}）が出ました！\n「${title}」`,
-  shareUrl: location.href,
-  shareHashtag: 'のざたんガチャ',
-};
+    function loadEpisodes() {
+      const inlineEl = document.getElementById('episodes-data');
+      const inlineText = inlineEl ? inlineEl.textContent.trim() : '';
 
-// ============================================================
-// 以下は通常編集不要
-// ============================================================
+      // インラインJSONが埋め込まれていれば、それを使う（standalone版）
+      if (inlineText) {
+        try {
+          episodes = JSON.parse(inlineText);
+          finishLoad();
+          return;
+        } catch (err) {
+          console.error('インラインJSONの解析に失敗:', err);
+        }
+      }
 
-const els = {
-  pullBtn: document.getElementById('pullBtn'),
-  card: document.getElementById('card'),
-  cardFront: document.getElementById('cardFront'),
-  cardRarity: document.getElementById('cardRarity'),
-  cardRarityLabel: document.getElementById('cardRarityLabel'),
-  result: document.getElementById('result'),
-  resultDate: document.getElementById('resultDate'),
-  resultTitle: document.getElementById('resultTitle'),
-  resultLength: document.getElementById('resultLength'),
-  resultLikes: document.getElementById('resultLikes'),
-  resultOption: document.getElementById('resultOption'),
-  resultPlayer: document.getElementById('resultPlayer'),
-  listenBtn: document.getElementById('listenBtn'),
-  shareBtn: document.getElementById('shareBtn'),
-  againBtn: document.getElementById('againBtn'),
-  premiumNotice: document.getElementById('premiumNotice'),
-  particles: document.getElementById('particles'),
-  stats: document.getElementById('stats'),
-};
-
-let episodes = [];
-let episodesByRarity = { SSR: [], SR: [], R: [], N: [] };
-let currentEpisode = null;
-let isAnimating = false;
-
-// Voicy埋め込みURLを生成
-// fetch_episode_ids.py で取得した embed_id があれば優先して使用。
-// なければ放送URLのスラッグ部分から生成（※スラッグ形式は埋め込み非対応のため、
-// 数値IDが取得できていない場合は埋め込みプレイヤーは表示されない）。
-function buildEmbedUrl(episode) {
-  if (!episode) return null;
-  // 数値IDがあればそれを使う（推奨パス）
-  if (episode.embed_id) {
-    // 放送URLからチャンネルIDを取り出して、数値IDと組み合わせる
-    try {
-      const u = new URL(episode.u);
-      const m = u.pathname.match(/^\/channel\/(\d+)\//);
-      if (m) return `https://voicy.jp/embed/channel/${m[1]}/${episode.embed_id}`;
-    } catch {}
-  }
-  // フォールバック：放送URLそのまま（スラッグ形式の場合は埋め込みが動かない可能性）
-  try {
-    const u = new URL(episode.u);
-    const m = u.pathname.match(/^\/channel\/(\d+)\/([^/]+)/);
-    if (m) return `https://voicy.jp/embed/channel/${m[1]}/${m[2]}`;
-  } catch {}
-  return null;
-}
-
-// iframeを生成して差し込む
-function renderPlayer(episode) {
-  const embedUrl = buildEmbedUrl(episode);
-  if (!embedUrl) {
-    els.resultPlayer.innerHTML = '';
-    return;
-  }
-  // 既存のiframeをいったん消してから差し直す（軽い演出効果）
-  els.resultPlayer.innerHTML = '';
-  const iframe = document.createElement('iframe');
-  iframe.src = embedUrl;
-  iframe.width = '100%';
-  iframe.height = '385';
-  iframe.frameBorder = '0';
-  iframe.scrolling = 'no';
-  iframe.style.overflow = 'hidden';
-  iframe.title = 'Voicy 埋め込みプレイヤー';
-  iframe.loading = 'lazy';
-  els.resultPlayer.appendChild(iframe);
-}
-
-// 放送データの読み込み
-// まずインライン埋め込みされたJSONを探し、なければCONFIG.dataUrlからfetchする
-async function loadEpisodes() {
-  try {
-    // モード1: インラインJSON（<script type="application/json" id="episodes-data">）
-    const inlineEl = document.getElementById('episodes-data');
-    if (inlineEl && inlineEl.textContent.trim()) {
-      episodes = JSON.parse(inlineEl.textContent);
-    } else {
-      // モード2: 外部JSONファイル
-      const res = await fetch(CONFIG.dataUrl, { cache: 'no-store' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      episodes = await res.json();
+      // インラインJSONがない場合は外部ファイルから読み込む（gacha.html版）
+      fetch('./episodes.json', { cache: 'no-store' })
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then(data => { episodes = data; finishLoad(); })
+        .catch(err => {
+          els.introText.textContent = '放送データの読み込みに失敗しました。';
+          console.error(err);
+        });
     }
 
-    // レア度ごとに振り分け
-    episodesByRarity = { SSR: [], SR: [], R: [], N: [] };
-    episodes.forEach(ep => {
-      if (episodesByRarity[ep.r]) episodesByRarity[ep.r].push(ep);
-    });
-
-    // 統計表示
-    const total = episodes.length;
-    const ssr = episodesByRarity.SSR.length;
-    els.stats.innerHTML =
-      `収録放送数 <strong>${total}本</strong>　／　うちプレミアム <strong>${ssr}本</strong>`;
-  } catch (err) {
-    els.stats.textContent = '放送データの読み込みに失敗しました。';
-    console.error(err);
-  }
-}
-
-// 重み付き抽選でレア度を決定
-function rollRarity() {
-  const weights = CONFIG.rarityWeights;
-  const total = Object.values(weights).reduce((a, b) => a + b, 0);
-  let r = Math.random() * total;
-  for (const [rarity, weight] of Object.entries(weights)) {
-    r -= weight;
-    if (r <= 0) {
-      // そのレア度に放送がなければ、他から選び直す（フォールバック）
-      if (episodesByRarity[rarity].length === 0) continue;
-      return rarity;
+    function finishLoad() {
+      episodesByRarity = { SSR: [], SR: [], R: [], N: [] };
+      episodes.forEach(ep => {
+        if (episodesByRarity[ep.r]) episodesByRarity[ep.r].push(ep);
+      });
+      els.introText.innerHTML =
+        `収録放送数 <strong style="color:#b9863a;">${episodes.length}本</strong><br>運命の1本に出会おう！`;
     }
-  }
-  // どれも該当しなかった場合のフォールバック
-  for (const rarity of ['SSR', 'SR', 'R', 'N']) {
-    if (episodesByRarity[rarity].length > 0) return rarity;
-  }
-  return 'N';
-}
 
-// 指定レア度からランダムに1本選ぶ
-function pickEpisode(rarity) {
-  const pool = episodesByRarity[rarity];
-  if (!pool || pool.length === 0) return null;
-  return pool[Math.floor(Math.random() * pool.length)];
-}
+    function rollRarity() {
+      const w = CONFIG.rarityWeights;
+      const total = Object.values(w).reduce((a, b) => a + b, 0);
+      let r = Math.random() * total;
+      for (const [rarity, weight] of Object.entries(w)) {
+        r -= weight;
+        if (r <= 0 && episodesByRarity[rarity].length > 0) return rarity;
+      }
+      for (const rarity of ['SSR', 'SR', 'R', 'N']) {
+        if (episodesByRarity[rarity].length > 0) return rarity;
+      }
+      return 'N';
+    }
 
-// SSR時のパーティクル演出
-function spawnParticles() {
-  els.particles.innerHTML = '';
-  for (let i = 0; i < 20; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.left = `${Math.random() * 100}%`;
-    p.style.top = `${50 + Math.random() * 50}%`;
-    p.style.animationDelay = `${Math.random() * 0.8}s`;
-    els.particles.appendChild(p);
-    requestAnimationFrame(() => p.classList.add('is-active'));
-  }
-  setTimeout(() => { els.particles.innerHTML = ''; }, 2500);
-}
+    function pickEpisode(rarity) {
+      const pool = episodesByRarity[rarity];
+      if (!pool || pool.length === 0) return null;
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
 
-// ガチャを引く
-async function pull() {
-  if (isAnimating || episodes.length === 0) return;
-  isAnimating = true;
-  els.pullBtn.disabled = true;
+    // Voicy埋め込みURLを生成（embed_idがあれば優先、なければスラッグにフォールバック）
+    function buildEmbedUrl(episode) {
+      if (!episode) return null;
+      if (episode.embed_id) {
+        try {
+          const u = new URL(episode.u);
+          const m = u.pathname.match(/^\/channel\/(\d+)\//);
+          if (m) return `https://voicy.jp/embed/channel/${m[1]}/${episode.embed_id}`;
+        } catch {}
+      }
+      try {
+        const u = new URL(episode.u);
+        const m = u.pathname.match(/^\/channel\/(\d+)\/([^/]+)/);
+        if (m) return `https://voicy.jp/embed/channel/${m[1]}/${m[2]}`;
+      } catch {}
+      return null;
+    }
 
-  // 結果非表示にリセット
-  els.result.classList.remove('is-visible');
-  els.premiumNotice.classList.remove('is-visible');
-  els.card.classList.remove('is-revealed');
-  els.resultPlayer.innerHTML = '';
+    function renderPlayer(episode) {
+      const embedUrl = buildEmbedUrl(episode);
+      els.resultPlayer.innerHTML = '';
+      if (!embedUrl) return;
+      const iframe = document.createElement('iframe');
+      iframe.src = embedUrl;
+      iframe.width = '100%';
+      iframe.height = '385';
+      iframe.frameBorder = '0';
+      iframe.scrolling = 'no';
+      iframe.style.overflow = 'hidden';
+      iframe.title = 'Voicy 埋め込みプレイヤー';
+      iframe.loading = 'lazy';
+      els.resultPlayer.appendChild(iframe);
+    }
 
-  // 抽選
-  const rarity = rollRarity();
-  const ep = pickEpisode(rarity);
-  if (!ep) {
-    isAnimating = false;
-    els.pullBtn.disabled = false;
-    return;
-  }
-  currentEpisode = ep;
+    function drawGacha() {
+      if (episodes.length === 0) return;
+      els.drawBtn.disabled = true;
+      els.drawBtn.innerHTML = '<span aria-hidden="true">🌀</span> 抽選中...';
+      els.capsuleImage.classList.remove('bouncing');
+      els.capsuleImage.classList.add('shaking');
 
-  // 少し待ってからカードを反転
-  await sleep(150);
+      setTimeout(() => {
+        const rarity = rollRarity();
+        const ep = pickEpisode(rarity);
+        if (!ep) return;
+        currentResult = { rarity, episode: ep };
+        showResult(rarity, ep);
+      }, 1500);
+    }
 
-  // カード情報を更新（反転中に表面を変えておく）
-  els.cardFront.dataset.rarity = rarity;
-  els.cardRarity.textContent = rarity;
-  els.cardRarityLabel.textContent = CONFIG.rarityLabels[rarity] || '';
+    function showResult(rarity, ep) {
+      const meta = CONFIG.rarityMeta[rarity];
 
-  // カード反転アニメーション開始
-  els.card.classList.add('is-revealed');
+      els.gachaMachine.classList.add('hide');
+      els.resultScreen.classList.remove('hide');
+      els.resultScreen.classList.add('flex', 'fade-in');
 
-  // SSR/SRはエフェクト
-  if (rarity === 'SSR') {
-    setTimeout(() => spawnParticles(), 600);
-  }
+      els.rarityBadge.textContent = meta.name;
+      els.rarityBadge.style.background = meta.color;
+      els.rarityText.textContent = meta.text;
 
-  // アニメーション完了を待ってから詳細を表示
-  await sleep(1100);
+      els.resultCard.className = `card-${rarity} rounded-2xl p-6 mb-6 w-full text-center flex flex-col gap-4 justify-center relative`;
 
-  els.resultDate.textContent = formatDate(ep.d);
-  els.resultTitle.textContent = ep.t;
-  els.resultLength.textContent = ep.len || '―';
-  els.resultLikes.textContent = `❤ ${ep.l}`;
-  els.resultOption.textContent = ep.o;
-  els.listenBtn.href = ep.u;
+      els.episodeTitle.textContent = ep.t;
+      els.episodeDate.textContent = (ep.d || '').replace(/-/g, '.');
+      els.episodeLength.innerHTML = `⏱ ${ep.len || '―'}`;
+      els.episodeLikes.innerHTML = `❤ ${ep.l}`;
 
-  // Voicy埋め込みプレイヤーを差し込む
-  renderPlayer(ep);
+      renderPlayer(ep);
 
-  if (rarity === 'SSR') {
-    els.premiumNotice.classList.add('is-visible');
-    els.listenBtn.textContent = 'のざこの部屋で開く →';
-  } else {
-    els.listenBtn.textContent = 'Voicyで開く →';
-  }
+      if (rarity === 'SSR') {
+        els.episodeOption.classList.remove('hidden');
+        els.voicyLink.innerHTML = '<span aria-hidden="true">▶</span> のざこの部屋で開く';
+      } else {
+        els.episodeOption.classList.add('hidden');
+        els.voicyLink.innerHTML = '<span aria-hidden="true">▶</span> Voicyで開く';
+      }
+      els.voicyLink.href = ep.u;
 
-  els.result.classList.add('is-visible');
-  els.againBtn.textContent = 'もう一回引く';
+      els.drawBtn.disabled = false;
+      els.drawBtn.innerHTML = '<span aria-hidden="true">✨</span> ガチャを回す！';
+      els.capsuleImage.classList.remove('shaking');
+      els.capsuleImage.classList.add('bouncing');
+    }
 
-  // ボタン復活
-  els.pullBtn.disabled = false;
-  els.pullBtn.textContent = 'もう一回引く';
-  isAnimating = false;
+    function resetGacha() {
+      els.resultScreen.classList.remove('fade-in', 'flex');
+      els.resultScreen.classList.add('hide');
+      els.resultPlayer.innerHTML = '';
+      els.gachaMachine.classList.remove('hide');
+    }
 
-  // 結果セクションへスクロール
-  setTimeout(() => {
-    els.result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, 200);
-}
+    function shareResult() {
+      if (!currentResult) return;
+      const { rarity, episode } = currentResult;
+      const text = CONFIG.shareTextTemplate(rarity, episode.t);
+      const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(episode.u)}&hashtags=${encodeURIComponent(CONFIG.shareHashtag)}`;
+      window.open(url, '_blank', 'noopener');
+    }
 
-// 日付の整形
-function formatDate(d) {
-  if (!d) return '';
-  return d.replace(/-/g, '.');
-}
+    els.drawBtn.addEventListener('click', drawGacha);
+    els.retryBtn.addEventListener('click', resetGacha);
+    els.shareBtn.addEventListener('click', shareResult);
 
-// シェア
-function share() {
-  if (!currentEpisode) return;
-  const text = CONFIG.shareTextTemplate(currentEpisode.r, currentEpisode.t);
-  const url = CONFIG.shareUrl;
-  const hashtag = CONFIG.shareHashtag;
-  const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtag)}`;
-  window.open(tweetUrl, '_blank', 'noopener');
-}
-
-// 状態リセット（もう一回引く用）
-function resetCard() {
-  els.card.classList.remove('is-revealed');
-}
-
-const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-
-// イベント登録
-els.pullBtn.addEventListener('click', async () => {
-  resetCard();
-  await sleep(200);
-  pull();
-});
-els.againBtn.addEventListener('click', async () => {
-  resetCard();
-  await sleep(200);
-  pull();
-});
-els.shareBtn.addEventListener('click', share);
-
-// 起動
-loadEpisodes();
-</script>
+    loadEpisodes();
+  </script>
 
 </body>
 </html>
